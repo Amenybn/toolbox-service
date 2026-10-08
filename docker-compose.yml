@@ -1,0 +1,12 @@
+name: toolbox
+
+services:
+  toolbox-service:
+    build: .
+    image: toolbox-service:latest
+    container_name: toolbox-service
+    environment:
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

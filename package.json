@@ -1,0 +1,21 @@
+{
+  "name": "toolbox-service",
+  "version": "1.0.0",
+  "description": "Micro-service REST sans base de données : QR codes, mots de passe, UUID, hash, analyse de texte, conversions d'unités",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

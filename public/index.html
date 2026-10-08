@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toolbox Service</title>
+  <style>
+    :root { --bg: #0f172a; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --primary: #4f46e5; --ok: #10b981; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; background: #f1f5f9; color: var(--text); }
+    header { background: linear-gradient(135deg, #0f172a, #312e81); color: #fff; padding: 40px 24px 90px; }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    h1 { margin: 0; font-size: 32px; letter-spacing: -.02em; }
+    header p { color: #c7d2fe; margin: 8px 0 20px; max-width: 640px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); padding: 6px 14px; border-radius: 999px; font-size: 13px; margin: 0 8px 8px 0; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #f59e0b; }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 0 4px rgba(16,185,129,.25); }
+    header a.btn { background: #fff; color: var(--primary); }
+    main { margin-top: -60px; padding: 0 16px 48px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(15,23,42,.06); }
+    .card h2 { margin: 0 0 4px; font-size: 17px; }
+    .card .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+    code { background: #f1f5f9; padding: 2px 7px; border-radius: 6px; font-size: 12px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin: 10px 0 6px; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font: inherit; }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border: 0; border-radius: 10px; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 14px; margin-top: 12px; }
+    .out { margin-top: 14px; padding: 12px 14px; background: #0f172a; color: #e2e8f0; border-radius: 10px; font-family: Consolas, monospace; font-size: 13px; word-break: break-all; min-height: 44px; white-space: pre-wrap; }
+    .qr { display: flex; justify-content: center; margin-top: 14px; min-height: 200px; align-items: center; background: #f8fafc; border-radius: 12px; }
+    .qr img { width: 200px; height: 200px; }
+    dl { display: grid; grid-template-columns: 140px 1fr; gap: 8px; margin: 0; font-size: 14px; }
+    dt { color: var(--muted); }
+    dd { margin: 0; font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>🧰 Toolbox Service</h1>
+      <p>Micro-service REST <strong>sans base de données</strong> et sans état : chaque réponse est calculée à la volée. Il peut être déployé, redémarré ou répliqué librement.</p>
+      <span class="pill"><span class="dot" id="statusDot"></span><span id="statusText">Vérification...</span></span>
+      <span class="pill">Node.js · Express</span>
+      <span class="pill">Aucune base de données</span>
+      <br>
+      <a class="btn" href="/docs">📖 Documentation interactive (Swagger)</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>📡 Instance</h2>
+        <p class="sub"><code>GET /api/info</code></p>
+        <dl id="info"><dt>Chargement...</dt><dd></dd></dl>
+      </section>
+
+      <section class="card">
+        <h2>🔳 QR code</h2>
+        <p class="sub"><code>GET /api/qrcode?text=...</code></p>
+        <label for="qrText">Texte ou URL</label>
+        <input id="qrText" value="https://github.com/Amenybn">
+        <div class="row">
+          <div><label for="qrColor">Couleur</label><input id="qrColor" type="color" value="#312e81"></div>
+          <div><label for="qrFormat">Format</label><select id="qrFormat"><option>png</option><option>svg</option></select></div>
+        </div>
+        <button class="btn" onclick="genQr()">Générer</button>
+        <div class="qr" id="qr"></div>
+      </section>
+
+      <section class="card">
+        <h2>🔐 Mot de passe</h2>
+        <p class="sub"><code>GET /api/password</code></p>
+        <div class="row">
+          <div><label for="pwLen">Longueur</label><input id="pwLen" type="number" value="20" min="4" max="128"></div>
+          <div><label for="pwSym">Symboles</label><select id="pwSym"><option value="true">Oui</option><option value="false">Non</option></select></div>
+        </div>
+        <button class="btn" onclick="genPassword()">Générer</button>
+        <div class="out" id="pwOut"></div>
+      </section>
+
+      <section class="card">
+        <h2>📐 Conversion</h2>
+        <p class="sub"><code>GET /api/convert</code></p>
+        <div class="row">
+          <div><label for="cvCat">Catégorie</label><select id="cvCat" onchange="fillUnits()"></select></div>
+          <div><label for="cvVal">Valeur</label><input id="cvVal" type="number" value="100"></div>
+        </div>
+        <div class="row">
+          <div><label for="cvFrom">De</label><select id="cvFrom"></select></div>
+          <div><label for="cvTo">Vers</label><select id="cvTo"></select></div>
+        </div>
+        <button class="btn" onclick="doConvert()">Convertir</button>
+        <div class="out" id="cvOut"></div>
+      </section>
+
+      <section class="card">
+        <h2>📝 Analyse de texte</h2>
+        <p class="sub"><code>POST /api/text/stats</code></p>
+        <textarea id="txt" rows="4">Docker simplifie le déploiement. Un service sans état se déploie facilement, et un service peut être répliqué sans risque !</textarea>
+        <button class="btn" onclick="doStats()">Analyser</button>
+        <div class="out" id="txtOut"></div>
+      </section>
+
+      <section class="card">
+        <h2>#️⃣ Hash</h2>
+        <p class="sub"><code>POST /api/hash</code></p>
+        <label for="hText">Texte</label>
+        <input id="hText" value="Bonjour le monde">
+        <label for="hAlg">Algorithme</label>
+        <select id="hAlg"><option>sha256</option><option>sha512</option><option>sha1</option><option>md5</option></select>
+        <button class="btn" onclick="doHash()">Calculer</button>
+        <div class="out" id="hOut"></div>
+      </section>
+    </div>
+  </main>
+  <footer>Toolbox Service · <a href="/openapi.json">openapi.json</a> · <a href="/health">/health</a></footer>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let units = {};
+
+    async function call(url, options) {
+      const res = await fetch(url, options);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || res.statusText);
+      return body;
+    }
+    const post = (url, data) => call(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const show = (id, promise) => promise.then(r => ($(id).textContent = JSON.stringify(r, null, 2))).catch(e => ($(id).textContent = '⚠ ' + e.message));
+
+    async function loadInfo() {
+      try {
+        const i = await call('/api/info');
+        $('statusDot').classList.add('ok');
+        $('statusText').textContent = 'En ligne · v' + i.version;
+        $('info').innerHTML = [
+          ['Service', i.service], ['Version', i.version], ['Hôte / conteneur', i.hostname], ['Node.js', i.node],
+          ['Démarré', new Date(i.startedAt).toLocaleString('fr-FR')], ['Uptime', i.uptimeSeconds + ' s'],
+          ['Mémoire', i.memoryMb + ' Mo'], ['Requêtes servies', i.requestsServed], ['Base de données', 'Aucune'],
+        ].map(([k, v]) => `<dt>${k}</dt><dd>${String(v).replace(/</g, '&lt;')}</dd>`).join('');
+      } catch {
+        $('statusText').textContent = 'Hors ligne';
+      }
+    }
+
+    function genQr() {
+      const params = new URLSearchParams({ text: $('qrText').value, color: $('qrColor').value, format: $('qrFormat').value, size: 400 });
+      $('qr').innerHTML = `<img alt="QR code" src="/api/qrcode?${params}">`;
+      setTimeout(loadInfo, 300);
+    }
+    const genPassword = () => show('pwOut', call(`/api/password?length=${$('pwLen').value}&symbols=${$('pwSym').value}`)).then(loadInfo);
+    const doStats = () => show('txtOut', post('/api/text/stats', { text: $('txt').value })).then(loadInfo);
+    const doHash = () => show('hOut', post('/api/hash', { text: $('hText').value, algorithm: $('hAlg').value })).then(loadInfo);
+    const doConvert = () =>
+      show('cvOut', call(`/api/convert?${new URLSearchParams({ category: $('cvCat').value, value: $('cvVal').value, from: $('cvFrom').value, to: $('cvTo').value })}`)).then(loadInfo);
+
+    function fillUnits() {
+      const list = units[$('cvCat').value] || [];
+      $('cvFrom').innerHTML = $('cvTo').innerHTML = list.map(u => `<option>${u}</option>`).join('');
+      $('cvTo').selectedIndex = Math.min(1, list.length - 1);
+    }
+
+    (async () => {
+      await loadInfo();
+      units = await call('/api/convert/units');
+      $('cvCat').innerHTML = Object.keys(units).map(c => `<option>${c}</option>`).join('');
+      $('cvCat').value = 'temperature';
+      fillUnits();
+      genQr();
+      genPassword();
+    })();
+  </script>
+</body>
+</html>
