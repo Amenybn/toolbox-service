@@ -11,8 +11,9 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY src ./src
 COPY public ./public
 
-# Exécution avec un utilisateur non-root
-USER node
+# Exécution avec un utilisateur non-root (UID numérique 1000 = "node", requis par runAsNonRoot sous Kubernetes).
+# Le service n'écrit rien sur le disque : compatible avec un système de fichiers en lecture seule.
+USER 1000:1000
 EXPOSE 3000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
